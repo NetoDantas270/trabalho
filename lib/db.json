@@ -1,0 +1,31 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Produto 1",
+      "service": "Serviço 1",
+      "price": "R$ 10.00",
+      "description": "Descrição do Produto 1",
+      "tags": ["Tag1", "Tag2"],
+      "icon": "business"
+    },
+    {
+      "id": 2,
+      "name": "Produto 2",
+      "service": "Serviço 2",
+      "price": "R$ 20.00",
+      "description": "Descrição do Produto 2",
+      "tags": ["Tag2", "Tag3"],
+      "icon": "home"
+    },
+    {
+      "id": 3,
+      "name": "Produto 3",
+      "service": "Serviço 3",
+      "price": "R$ 15.00",
+      "description": "Descrição do Produto 3",
+      "tags": ["Tag3", "Tag4"],
+      "icon": "local_hospital"
+    }
+  ]
+}
