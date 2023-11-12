@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'main.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,6 +11,23 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
   List<Product> allProducts = [];
   List<Product> filteredProducts = [];
+
+  // Mapeamento entre os valores recebidos do banco de dados e os ícones do Flutter
+  final Map<String, IconData> iconMappings = {
+    'restaurant': Icons.restaurant,
+    'house': Icons.house,
+    'spa': Icons.spa,
+    'school': Icons.school,
+    'movie': Icons.movie,
+    'add': Icons.add,
+    'hotel': Icons.hotel,
+    'cleaning_services': Icons.cleaning_services,
+    'settings': Icons.settings,
+    'pets': Icons.pets,
+    'local_hospital': Icons.local_hospital,
+    'directions_bus': Icons.directions_bus,
+    // Adicione mais mapeamentos conforme necessário
+  };
 
   @override
   void initState() {
@@ -32,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> productsJson = json.decode(response.body);
-      List<Product> products = productsJson.map((json) => Product.fromJson(json)).toList();
+      List<Product> products = productsJson.map((json) => Product.fromJson(json, iconMappings)).toList();
       return products;
     } else {
       throw Exception('Falha ao carregar os produtos do banco de dados');
@@ -54,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _containsIgnoreCase(List<String> list, String searchTerm) {
     return list.any((item) => item.toLowerCase().contains(searchTerm));
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,48 +83,69 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Pesquisar',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: 'Pesquisar',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  _filterProducts(value);
+                },
               ),
-              onChanged: (value) {
-                _filterProducts(value);
-              },
             ),
-          ),
-          SizedBox(height: 20.0),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildRoundedButton(context, Icons.ac_unit, 'Botão 1', () {
-                  Navigator.pushNamed(context, '/tela1');
-                }),
-                _buildRoundedButton(context, Icons.access_alarm, 'Botão 2', () {
-                  Navigator.pushNamed(context, '/tela2');
-                }),
-                _buildRoundedButton(context, Icons.accessibility, 'Botão 3', () {
-                  Navigator.pushNamed(context, '/tela3');
-                }),
-                _buildRoundedButton(context, Icons.account_balance, 'Botão 4', () {
-                  Navigator.pushNamed(context, '/tela4');
-                }),
-                _buildRoundedButton(context, Icons.add, 'Botão 5', () {
-                  Navigator.pushNamed(context, '/tela5');
-                }),
-              ],
+            SizedBox(height: 20.0),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildRoundedButton(context, Icons.restaurant, 'Alimentação', () {
+                    Navigator.pushNamed(context, '/tela1');
+                  }),
+                  _buildRoundedButton(context, Icons.house, 'Aluguel', () {
+                    Navigator.pushNamed(context, '/tela2');
+                  }),
+                  _buildRoundedButton(context, Icons.spa, 'Beleza e Bem-estar', () {
+                    Navigator.pushNamed(context, '/tela3');
+                  }),
+                  _buildRoundedButton(context, Icons.school, 'Educação', () {
+                    Navigator.pushNamed(context, '/tela4');
+                  }),
+                  _buildRoundedButton(context, Icons.add, 'Adicionar Novo Serviço', () {
+                    Navigator.pushNamed(context, '/tela5');
+                  }),
+                  _buildRoundedButton(context, Icons.movie, 'Entretenimento', () {
+                    Navigator.pushNamed(context, '/tela6');
+                  }),
+                  _buildRoundedButton(context, Icons.hotel, 'Hotelaria', () {
+                    Navigator.pushNamed(context, '/tela7');
+                  }),
+                  _buildRoundedButton(context, Icons.cleaning_services, 'Limpeza', () {
+                    Navigator.pushNamed(context, '/tela8');
+                  }),
+                  _buildRoundedButton(context, Icons.settings, 'Manutenção', () {
+                    Navigator.pushNamed(context, '/tela9');
+                  }),
+                  _buildRoundedButton(context, Icons.pets, 'Pets', () {
+                    Navigator.pushNamed(context, '/tela10');
+                  }),
+                  _buildRoundedButton(context, Icons.local_hospital, 'Saúde', () {
+                    Navigator.pushNamed(context, '/tela11');
+                  }),
+                  _buildRoundedButton(context, Icons.directions_bus, 'Transporte', () {
+                    Navigator.pushNamed(context, '/tela12');
+                  }),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 20.0),
-          Expanded(
-            child: GridView.builder(
+            SizedBox(height: 20.0),
+            GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.0,
@@ -127,8 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -211,6 +249,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Product {
+  final int id;
+  final String name;
+  final String service;
+  final double price;
+  final String description;
+  final List<String> tags;
+  final IconData icon;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.service,
+    required this.price,
+    required this.description,
+    required this.tags,
+    required this.icon,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json, Map<String, IconData> iconMappings) {
+    return Product(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      service: json['service'] as String,
+      price: json['price'].toDouble(),
+      description: json['description'] as String,
+      tags: List<String>.from(json['tags']),
+      icon: iconMappings[json['icon']] ?? Icons.error, // Ícone padrão em caso de mapeamento ausente
     );
   }
 }

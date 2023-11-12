@@ -27,6 +27,13 @@ class MyApp extends StatelessWidget {
         '/tela3': (context) => Tela3(),
         '/tela4': (context) => Tela4(),
         '/tela5': (context) => Tela5(),
+        '/tela6': (context) => Tela6(),
+        '/tela7': (context) => Tela7(),
+        '/tela8': (context) => Tela8(),
+        '/tela9': (context) => Tela9(),
+        '/tela10': (context) => Tela10(),
+        '/tela11': (context) => Tela11(),
+        '/tela12': (context) => Tela12(),
       },
     );
   }
@@ -197,6 +204,103 @@ class Product {
   }
 }
 
+class Tela6 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Entretenimento'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Entretenimento!'),
+      ),
+    );
+  }
+}
+
+class Tela7 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hotelaria'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Hotelaria!'),
+      ),
+    );
+  }
+}
+
+class Tela8 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Limpeza'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Limpeza!'),
+      ),
+    );
+  }
+}
+
+class Tela9 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Manutenção'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Manutenção!'),
+      ),
+    );
+  }
+}
+
+class Tela10 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Pets'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Pets!'),
+      ),
+    );
+  }
+}
+
+class Tela11 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Saúde'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Saúde!'),
+      ),
+    );
+  }
+}
+
+class Tela12 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Transporte'),
+      ),
+      body: Center(
+        child: Text('Bem-vindo à tela de Transporte!'),
+      ),
+    );
+  }
+}
 
 
 

@@ -18,13 +18,29 @@ class _Tela5State extends State<Tela5> {
   // Map para manter o controle das tags selecionadas
   Map<String, bool> selectedTags = {};
 
-  IconData selectedIcon = Icons.business; // Ícone padrão
+  IconData selectedIcon = Icons.restaurant; // Ícone padrão
+
+  // Mapeamento entre os valores recebidos do banco de dados e os ícones do Flutter
+  final Map<String, IconData> iconMappings = {
+    'restaurant': Icons.restaurant,
+    'house': Icons.house,
+    'spa': Icons.spa,
+    'school': Icons.school,
+    'movie': Icons.movie,
+    'hotel': Icons.hotel,
+    'cleaning_services': Icons.cleaning_services,
+    'settings': Icons.settings,
+    'pets': Icons.pets,
+    'local_hospital': Icons.local_hospital,
+    'directions_bus': Icons.directions_bus,
+    // Adicione mais mapeamentos conforme necessário
+  };
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(Uri.parse('https://my-json-server.typicode.com/NetoDantas270/BD_mobile/products'));
     if (response.statusCode == 200) {
       final List<dynamic> productsJson = json.decode(response.body);
-      List<Product> products = productsJson.map((json) => Product.fromJson(json)).toList();
+      List<Product> products = productsJson.map((json) => Product.fromJson(json, iconMappings)).toList();
       return products;
     } else {
       throw Exception('Falha ao carregar os produtos do banco de dados');
@@ -170,7 +186,7 @@ class _Tela5State extends State<Tela5> {
   }
 
   List<Widget> _buildTagChips() {
-    final List<String> availableTags = ["Tag1", "Tag2", "Tag3", "Tag4"];
+    final List<String> availableTags = ["Alimentação", "Aluguel", "Beleza", "Educação", "Entretenimento", "Hotelaria", "Limpeza", "Manutenção", "Pets", "Saúde", "Transporte"];
     final tagChips = <Widget>[];
     for (final tag in availableTags) {
       tagChips.add(_buildTagChip(tag));
@@ -215,7 +231,7 @@ class Product {
     required this.icon,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromJson(Map<String, dynamic> json, Map<String, IconData> iconMappings) {
     return Product(
       id: json['id'] as int,
       name: json['name'] as String,
@@ -223,7 +239,7 @@ class Product {
       price: json['price'].toDouble(),
       description: json['description'] as String,
       tags: List<String>.from(json['tags']),
-      icon: Icons.business, // Defina o ícone com base nos dados, se necessário
+      icon: iconMappings[json['icon']] ?? Icons.error, // Ícone padrão em caso de mapeamento ausente
     );
   }
 
@@ -252,31 +268,70 @@ class IconSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-      Text(
-      'Selecione o Ícone:',
-      style: TextStyle(fontSize: 18.0),
-    ),
-    Row(
-    children: [
-    IconButton(
-    icon: Icon(Icons.business),
-    onPressed: () => onIconSelected(Icons.business),
-    color: selectedIcon == Icons.business ? Colors.blue : Colors.grey,
-    ),
-    IconButton(
-    icon: Icon(Icons.home),
-    onPressed: () => onIconSelected(Icons.home),
-    color: selectedIcon == Icons.home ? Colors.blue : Colors.grey,
-    ),
-    IconButton(
-    icon: Icon(Icons.school),
-    onPressed: () => onIconSelected(Icons.school),
-    color: selectedIcon == Icons.school ? Colors.blue : Colors.grey,
-    ),
-    ],
-    ),
-    ],
+        Text(
+          'Selecione o Ícone:',
+          style: TextStyle(fontSize: 18.0),
+        ),
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.restaurant),
+              onPressed: () => onIconSelected(Icons.restaurant),
+              color: selectedIcon == Icons.restaurant ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.house),
+              onPressed: () => onIconSelected(Icons.house),
+              color: selectedIcon == Icons.house ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.spa),
+              onPressed: () => onIconSelected(Icons.spa),
+              color: selectedIcon == Icons.spa ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.school),
+              onPressed: () => onIconSelected(Icons.school),
+              color: selectedIcon == Icons.school ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.movie),
+              onPressed: () => onIconSelected(Icons.movie),
+              color: selectedIcon == Icons.movie ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.hotel),
+              onPressed: () => onIconSelected(Icons.hotel),
+              color: selectedIcon == Icons.hotel ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.cleaning_services),
+              onPressed: () => onIconSelected(Icons.cleaning_services),
+              color: selectedIcon == Icons.cleaning_services ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () => onIconSelected(Icons.settings),
+              color: selectedIcon == Icons.settings ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.pets),
+              onPressed: () => onIconSelected(Icons.pets),
+              color: selectedIcon == Icons.pets ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.local_hospital),
+              onPressed: () => onIconSelected(Icons.local_hospital),
+              color: selectedIcon == Icons.local_hospital ? Colors.blue : Colors.grey,
+            ),
+            IconButton(
+              icon: Icon(Icons.directions_bus),
+              onPressed: () => onIconSelected(Icons.directions_bus),
+              color: selectedIcon == Icons.directions_bus ? Colors.blue : Colors.grey,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
-
