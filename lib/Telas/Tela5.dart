@@ -87,7 +87,7 @@ class _Tela5State extends State<Tela5> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tela 5'),
+        title: Text('Adicionar Novo Serviço'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {

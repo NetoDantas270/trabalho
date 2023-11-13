@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'HomeScreen.dart';
-import 'Tela5.dart';
+import "Telas/Tela1.dart";
+import "Telas/Tela2.dart";
+import "Telas/Tela3.dart";
+import "Telas/Tela4.dart";
+import "Telas/Tela5.dart";
+import "Telas/Tela6.dart";
+import "Telas/Tela7.dart";
+import "Telas/Tela8.dart";
+import "Telas/Tela9.dart";
+import "Telas/Tela10.dart";
+import "Telas/Tela11.dart";
+import "Telas/Tela12.dart";
 
 
 
@@ -115,63 +126,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-
-class Tela1 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tela 1'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à Tela 1!'),
-      ),
-    );
-  }
-}
-
-class Tela2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tela 2'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à Tela 2!'),
-      ),
-    );
-  }
-}
-
-class Tela3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tela 3'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à Tela 3!'),
-      ),
-    );
-  }
-}
-
-class Tela4 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tela 4'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à Tela 4!'),
-      ),
-    );
-  }
-}
-
 class Product {
   final int id;
   final String name;
@@ -200,104 +154,6 @@ class Product {
       description: json['description'] as String,
       tags: List<String>.from(json['tags']),
       icon: Icons.business, // Defina o ícone com base nos dados, se necessário
-    );
-  }
-}
-
-class Tela6 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Entretenimento'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Entretenimento!'),
-      ),
-    );
-  }
-}
-
-class Tela7 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hotelaria'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Hotelaria!'),
-      ),
-    );
-  }
-}
-
-class Tela8 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Limpeza'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Limpeza!'),
-      ),
-    );
-  }
-}
-
-class Tela9 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Manutenção'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Manutenção!'),
-      ),
-    );
-  }
-}
-
-class Tela10 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Pets'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Pets!'),
-      ),
-    );
-  }
-}
-
-class Tela11 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Saúde'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Saúde!'),
-      ),
-    );
-  }
-}
-
-class Tela12 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Transporte'),
-      ),
-      body: Center(
-        child: Text('Bem-vindo à tela de Transporte!'),
-      ),
     );
   }
 }
