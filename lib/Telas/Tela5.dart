@@ -12,15 +12,12 @@ class _Tela5State extends State<Tela5> {
   final TextEditingController _serviceController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _avaliacaoController = TextEditingController();
 
-  // Lista de tags
   List<String> tags = [];
-  // Map para manter o controle das tags selecionadas
   Map<String, bool> selectedTags = {};
+  IconData selectedIcon = Icons.restaurant;
 
-  IconData selectedIcon = Icons.restaurant; // Ícone padrão
-
-  // Mapeamento entre os valores recebidos do banco de dados e os ícones do Flutter
   final Map<String, IconData> iconMappings = {
     'restaurant': Icons.restaurant,
     'house': Icons.house,
@@ -33,7 +30,6 @@ class _Tela5State extends State<Tela5> {
     'pets': Icons.pets,
     'local_hospital': Icons.local_hospital,
     'directions_bus': Icons.directions_bus,
-    // Adicione mais mapeamentos conforme necessário
   };
 
   Future<List<Product>> fetchProducts() async {
@@ -52,6 +48,7 @@ class _Tela5State extends State<Tela5> {
     final String service = _serviceController.text;
     final String price = _priceController.text;
     final String description = _descriptionController.text;
+    final String avaliacao = _avaliacaoController.text;
 
     if (name.isNotEmpty && service.isNotEmpty && price.isNotEmpty) {
       final Map<String, dynamic> productData = {
@@ -60,10 +57,10 @@ class _Tela5State extends State<Tela5> {
         'price': double.parse(price),
         'description': description,
         'tags': tags,
-        'icon': selectedIcon.codePoint, // Mapeia o ícone para um código de ponto
+        'icon': selectedIcon.codePoint,
+        'avaliacao': double.parse(avaliacao), // Avaliação adicionada
       };
 
-      // Realize a chamada para adicionar o produto ao banco de dados
       final response = await http.post(
         Uri.parse('https://my-json-server.typicode.com/NetoDantas270/BD_mobile/products'),
         headers: {'Content-Type': 'application/json'},
@@ -71,13 +68,13 @@ class _Tela5State extends State<Tela5> {
       );
 
       if (response.statusCode == 201) {
-        // Produto adicionado com sucesso
         setState(() {
-          tags = []; // Limpar as tags
+          tags = [];
           _nameController.clear();
           _serviceController.clear();
           _priceController.clear();
           _descriptionController.clear();
+          _avaliacaoController.clear(); // Limpar o campo de avaliação
         });
       }
     }
@@ -115,6 +112,11 @@ class _Tela5State extends State<Tela5> {
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(labelText: 'Descrição do Vendedor'),
+              ),
+              TextField(
+                controller: _avaliacaoController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: 'Avaliação (0.0 - 5.0)'),
               ),
               Text(
                 'Selecione Tags:',
@@ -169,6 +171,12 @@ class _Tela5State extends State<Tela5> {
                                 Text('Preço: ${product.price.toStringAsFixed(2)}'),
                                 Text('Descrição: ${product.description}'),
                                 Text('Tags: ${product.tags.join(', ')}'),
+                                Row(
+                                  children: [
+                                    Text('Avaliação: '),
+                                    _buildRatingStars(product.avaliacao),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -210,6 +218,34 @@ class _Tela5State extends State<Tela5> {
       },
     );
   }
+
+  Widget _buildRatingStars(double rating) {
+    int filledStars = rating.floor();
+    bool hasHalfStar = (rating - filledStars) >= 0.5;
+
+    List<Widget> stars = List.generate(
+      5,
+          (index) {
+        IconData starIcon = Icons.star;
+        if (index < filledStars) {
+          starIcon = Icons.star;
+        } else if (hasHalfStar && index == filledStars) {
+          starIcon = Icons.star_half;
+        } else {
+          starIcon = Icons.star_border;
+        }
+        return Icon(starIcon, color: Colors.yellow);
+      },
+    );
+
+    return Row(
+      children: [
+        Row(children: stars),
+        SizedBox(width: 5),
+        Text(rating.toString()), // Adicionando a nota em números
+      ],
+    );
+  }
 }
 
 class Product {
@@ -220,6 +256,7 @@ class Product {
   final String description;
   final List<String> tags;
   final IconData icon;
+  final double avaliacao;
 
   Product({
     required this.id,
@@ -229,6 +266,7 @@ class Product {
     required this.description,
     required this.tags,
     required this.icon,
+    required this.avaliacao,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, Map<String, IconData> iconMappings) {
@@ -239,21 +277,9 @@ class Product {
       price: json['price'].toDouble(),
       description: json['description'] as String,
       tags: List<String>.from(json['tags']),
-      icon: iconMappings[json['icon']] ?? Icons.error, // Ícone padrão em caso de mapeamento ausente
+      icon: iconMappings[json['icon']] ?? Icons.error,
+      avaliacao: json['avaliacao'] != null ? json['avaliacao'].toDouble() : 0.0,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'service': service,
-      'price': price,
-      'description': description,
-      'tags': tags,
-      // Se necessário, você pode mapear o ícone para um valor que faça sentido para a API
-      // 'icon': icon.codePoint,
-    };
   }
 }
 

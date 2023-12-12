@@ -7,10 +7,14 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   TextEditingController _searchController = TextEditingController();
   List<Product> allProducts = [];
   List<Product> filteredProducts = [];
+  bool ignoreInitialFilter = false;
+  bool searchTermDeleted = false; // Adicione a declaração da variável aqui
+
+  late TabController _tabController;
 
   // Mapeamento entre os valores recebidos do banco de dados e os ícones do Flutter
   final Map<String, IconData> iconMappings = {
@@ -36,9 +40,20 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchProducts().then((products) {
       setState(() {
         allProducts = List.of(products);
-        filteredProducts = List.of(allProducts);
+        _filterProducts(""); // Inicialmente, exibir todos os produtos
+        ignoreInitialFilter = true; // Configura a flag para ignorar o filtro inicial
       });
     });
+
+    // Inicializar a TabController
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    // Dispose da TabController quando a tela for descartada
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<List<Product>> fetchProducts() async {
@@ -57,13 +72,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _filterProducts(String searchTerm) {
     setState(() {
-      searchTerm = searchTerm.toLowerCase(); // Converter o termo de pesquisa para minúsculas
-      filteredProducts = allProducts.where((product) {
-        return product.name.toLowerCase().contains(searchTerm) ||
+      searchTerm = searchTerm.toLowerCase();
+
+      if (searchTerm.isEmpty) {
+        filteredProducts = allProducts
+            .where((product) => product.avaliacao != null)
+            .toList()
+          ..sort((a, b) {
+            if (a.avaliacao != null && b.avaliacao != null) {
+              return b.avaliacao!.compareTo(a.avaliacao!);
+            } else {
+              return 0;
+            }
+          });
+        searchTermDeleted = false;
+      } else {
+        filteredProducts = allProducts
+            .where((product) =>
+        product.name.toLowerCase().contains(searchTerm) ||
             product.service.toLowerCase().contains(searchTerm) ||
             _containsIgnoreCase(product.tags, searchTerm) ||
-            product.price.toString().toLowerCase().contains(searchTerm);
-      }).toList();
+            product.price.toString().toLowerCase().contains(searchTerm))
+            .toList();
+        searchTermDeleted = true;
+      }
     });
   }
 
@@ -82,91 +114,124 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.of(context).pop();
           },
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Pesquisar',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  _filterProducts(value);
-                },
-              ),
-            ),
-            SizedBox(height: 20.0),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildRoundedButton(context, Icons.restaurant, 'Alimentação', () {
-                    Navigator.pushNamed(context, '/tela1');
-                  }),
-                  _buildRoundedButton(context, Icons.house, 'Aluguel', () {
-                    Navigator.pushNamed(context, '/tela2');
-                  }),
-                  _buildRoundedButton(context, Icons.spa, 'Beleza e Bem-estar', () {
-                    Navigator.pushNamed(context, '/tela3');
-                  }),
-                  _buildRoundedButton(context, Icons.school, 'Educação', () {
-                    Navigator.pushNamed(context, '/tela4');
-                  }),
-                  _buildRoundedButton(context, Icons.add, 'Adicionar Novo Serviço', () {
-                    Navigator.pushNamed(context, '/tela5');
-                  }),
-                  _buildRoundedButton(context, Icons.movie, 'Entretenimento', () {
-                    Navigator.pushNamed(context, '/tela6');
-                  }),
-                  _buildRoundedButton(context, Icons.hotel, 'Hotelaria', () {
-                    Navigator.pushNamed(context, '/tela7');
-                  }),
-                  _buildRoundedButton(context, Icons.cleaning_services, 'Limpeza', () {
-                    Navigator.pushNamed(context, '/tela8');
-                  }),
-                  _buildRoundedButton(context, Icons.settings, 'Manutenção', () {
-                    Navigator.pushNamed(context, '/tela9');
-                  }),
-                  _buildRoundedButton(context, Icons.pets, 'Pets', () {
-                    Navigator.pushNamed(context, '/tela10');
-                  }),
-                  _buildRoundedButton(context, Icons.local_hospital, 'Saúde', () {
-                    Navigator.pushNamed(context, '/tela11');
-                  }),
-                  _buildRoundedButton(context, Icons.directions_bus, 'Transporte', () {
-                    Navigator.pushNamed(context, '/tela12');
-                  }),
-                ],
-              ),
-            ),
-            SizedBox(height: 20.0),
-            GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.0,
-              ),
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = filteredProducts[index];
-                return _buildProductCard(
-                  product.icon,
-                  product.name,
-                  product.service,
-                  product.price.toString(),
-                  product.description,
-                  product.tags.join(', '),
-                );
-              },
-            ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Produtos'),
+            Tab(text: 'Botões'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildProductsTab(context),
+          _buildButtonsTab(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButtonsTab(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: 20.0),
+          GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+            ),
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: iconMappings.length,
+            itemBuilder: (context, index) {
+              final iconKey = iconMappings.keys.elementAt(index);
+              final icon = iconMappings[iconKey]!;
+              return _buildRoundedButton(context, icon, _getButtonText(iconKey), () {
+                _navigateToProductScreen(context, icon);
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getButtonText(String iconKey) {
+    switch (iconKey) {
+      case 'restaurant':
+        return 'Alimentação';
+      case 'house':
+        return 'Aluguel';
+      case 'spa':
+        return 'Beleza';
+      case 'school':
+        return 'Educação';
+      case 'movie':
+        return 'Entretenimento';
+      case 'add':
+        return 'Adicionar';
+      case 'hotel':
+        return 'Hotelaria';
+      case 'cleaning_services':
+        return 'Limpeza';
+      case 'settings':
+        return 'Manutenção';
+      case 'pets':
+        return 'Pets';
+      case 'local_hospital':
+        return 'Saúde';
+      case 'directions_bus':
+        return 'Transporte';
+      default:
+        return 'Desconhecido';
+    }
+  }
+
+  Widget _buildProductsTab(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Pesquisar',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                _filterProducts(value);
+              },
+            ),
+          ),
+          SizedBox(height: 20.0),
+          GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+            ),
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: filteredProducts.length,
+            itemBuilder: (context, index) {
+              final product = filteredProducts[index];
+              return _buildProductCard(
+                product.icon,
+                product.name,
+                product.service,
+                product.price.toString(),
+                product.description,
+                product.tags.join(', '),
+                product.avaliacao ?? 0.0,  // Adicionando a avaliação ao card
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -177,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
       style: ElevatedButton.styleFrom(
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0), // Define o raio das bordas
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
       child: Column(
@@ -194,6 +259,52 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToProductScreen(BuildContext context, IconData icon) {
+    // Implemente a navegação para a tela de produtos com base no ícone
+    // Aqui você pode usar um switch ou if-else para determinar a rota apropriada
+    switch (icon) {
+      case Icons.restaurant:
+        Navigator.pushNamed(context, '/tela1');
+        break;
+      case Icons.house:
+        Navigator.pushNamed(context, '/tela2');
+        break;
+      case Icons.spa:
+        Navigator.pushNamed(context, '/tela3');
+        break;
+      case Icons.school:
+        Navigator.pushNamed(context, '/tela4');
+        break;
+      case Icons.movie:
+        Navigator.pushNamed(context, '/tela6');
+        break;
+      case Icons.add:
+        Navigator.pushNamed(context, '/tela5');
+        break;
+      case Icons.hotel:
+        Navigator.pushNamed(context, '/tela7');
+        break;
+      case Icons.cleaning_services:
+        Navigator.pushNamed(context, '/tela8');
+        break;
+      case Icons.settings:
+        Navigator.pushNamed(context, '/tela9');
+        break;
+      case Icons.pets:
+        Navigator.pushNamed(context, '/tela10');
+        break;
+      case Icons.local_hospital:
+        Navigator.pushNamed(context, '/tela11');
+        break;
+      case Icons.directions_bus:
+        Navigator.pushNamed(context, '/tela12');
+        break;
+    // Adicione mais casos conforme necessário
+      default:
+        print('Ícone não mapeado para uma rota.');
+    }
+  }
+
   Widget _buildProductCard(
       IconData icon,
       String name,
@@ -201,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
       String price,
       String description,
       String tags,
+      double? avaliacao,  // Alteração: Mudando de int para double
       ) {
     return Card(
       margin: EdgeInsets.all(16.0),
@@ -213,6 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(service),
             Text(price, style: TextStyle(fontSize: 16.0)),
+            _buildAvaliacaoStars(avaliacao!), // Exibindo a avaliação como estrelas
             InkWell(
               onTap: () {
                 // Ao clicar em um produto, exibir a descrição e as tags
@@ -251,6 +364,34 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildAvaliacaoStars(double avaliacao) {
+    int filledStars = avaliacao.floor();
+    bool hasHalfStar = (avaliacao - filledStars) >= 0.5;
+
+    List<Widget> stars = List.generate(
+      5,
+          (index) {
+        IconData starIcon = Icons.star;
+        if (index < filledStars) {
+          starIcon = Icons.star;
+        } else if (hasHalfStar && index == filledStars) {
+          starIcon = Icons.star_half;
+        } else {
+          starIcon = Icons.star_border;
+        }
+        return Icon(starIcon, color: Colors.yellow);
+      },
+    );
+
+    return Row(
+      children: [
+        Row(children: stars),
+        SizedBox(width: 5),
+        Text(avaliacao.toString()), // Adicionando a nota em números
+      ],
+    );
+  }
 }
 
 class Product {
@@ -260,6 +401,7 @@ class Product {
   final double price;
   final String description;
   final List<String> tags;
+  double? avaliacao; // Removendo o 'final' para permitir modificação
   final IconData icon;
 
   Product({
@@ -269,6 +411,7 @@ class Product {
     required this.price,
     required this.description,
     required this.tags,
+    this.avaliacao, // Permitindo valores nulos
     required this.icon,
   });
 
@@ -277,10 +420,11 @@ class Product {
       id: json['id'] as int,
       name: json['name'] as String,
       service: json['service'] as String,
-      price: json['price'].toDouble(),
+      price: json['price'] != null ? json['price'].toDouble() : 0.0,
       description: json['description'] as String,
-      tags: List<String>.from(json['tags']),
-      icon: iconMappings[json['icon']] ?? Icons.error, // Ícone padrão em caso de mapeamento ausente
+      tags: List<String>.from(json['tags'] ?? []),
+      avaliacao: json['avaliacao'] != null ? json['avaliacao'].toDouble() : null,
+      icon: iconMappings[json['icon']] ?? Icons.error,
     );
   }
 }

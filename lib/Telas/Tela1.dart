@@ -129,6 +129,7 @@ class _Tela1State extends State<Tela1> {
                   product.price.toString(),
                   product.description,
                   product.tags.join(', '),
+                  product.avaliacao ?? 0.0,  // Adicionando a avaliação ao card
                 );
               },
             ),
@@ -145,6 +146,7 @@ class _Tela1State extends State<Tela1> {
       String price,
       String description,
       String tags,
+      double avaliacao,  // Adicionando o parâmetro de avaliação
       ) {
     return Card(
       margin: EdgeInsets.all(16.0),
@@ -157,6 +159,7 @@ class _Tela1State extends State<Tela1> {
           children: [
             Text(service),
             Text(price, style: TextStyle(fontSize: 16.0)),
+            _buildAvaliacaoStars(avaliacao), // Chamando o método para construir as estrelas de avaliação
             InkWell(
               onTap: () {
                 // Ao clicar em um produto, exibir a descrição e as tags
@@ -195,6 +198,36 @@ class _Tela1State extends State<Tela1> {
       ),
     );
   }
+
+
+  Widget _buildAvaliacaoStars(double avaliacao) {
+    int filledStars = avaliacao.floor();
+    bool hasHalfStar = (avaliacao - filledStars) >= 0.5;
+
+    List<Widget> stars = List.generate(
+      5,
+          (index) {
+        IconData starIcon = Icons.star;
+        if (index < filledStars) {
+          starIcon = Icons.star;
+        } else if (hasHalfStar && index == filledStars) {
+          starIcon = Icons.star_half;
+        } else {
+          starIcon = Icons.star_border;
+        }
+        return Icon(starIcon, color: Colors.yellow);
+      },
+    );
+
+    return Row(
+      children: [
+        Row(children: stars),
+        SizedBox(width: 5),
+        Text(avaliacao.toString()), // Adicionando a nota em números
+      ],
+    );
+  }
+
 }
 
 class Product {
@@ -204,6 +237,7 @@ class Product {
   final double price;
   final String description;
   final List<String> tags;
+  double? avaliacao; // Removendo o 'final' para permitir modificação
   final IconData icon;
 
   Product({
@@ -213,6 +247,7 @@ class Product {
     required this.price,
     required this.description,
     required this.tags,
+    this.avaliacao, // Permitindo valores nulos
     required this.icon,
   });
 
@@ -221,10 +256,11 @@ class Product {
       id: json['id'] as int,
       name: json['name'] as String,
       service: json['service'] as String,
-      price: json['price'].toDouble(),
+      price: json['price'] != null ? json['price'].toDouble() : 0.0,
       description: json['description'] as String,
-      tags: List<String>.from(json['tags']),
-      icon: iconMappings[json['icon']] ?? Icons.error, // Ícone padrão em caso de mapeamento ausente
+      tags: List<String>.from(json['tags'] ?? []),
+      avaliacao: json['avaliacao'] != null ? json['avaliacao'].toDouble() : null,
+      icon: iconMappings[json['icon']] ?? Icons.error,
     );
   }
 }
